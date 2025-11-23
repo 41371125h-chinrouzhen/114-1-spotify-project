@@ -1,0 +1,631 @@
+/* --- /client/src/styles/App.css --- */
+
+/* ---------------- */
+/* 0. 根目錄 & 框架 */
+/* ---------------- */
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+:root {
+    --main-text-color: #ffffff;
+    --main-bg-color: #000000;
+    --accent-color: #1ED760;
+    --font-display: 'Georgia', serif;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--main-bg-color);
+    color: var(--main-text-color);
+}
+
+#root {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.frame-container {
+    width: 95vw;
+    height: 90vh;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ---------------- */
+/* 1. 核心佈局 (Z-Index) */
+/* ---------------- */
+.canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: auto;
+}
+
+.scroll-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    overflow: hidden;
+    pointer-events: none; /* 預設不阻擋滑鼠，重要！ */
+}
+
+    .scroll-container.at-stage-5 {
+        pointer-events: auto;
+    }
+
+
+/* ---------------- */
+/* 2. 階段 1 & 2 (UI) */
+/* ---------------- */
+.ui-stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    /* 加入轉場讓顯示/隱藏更平滑 */
+    transition: opacity 1s ease, visibility 1s ease;
+}
+
+.phase-1-ui {
+    z-index: 10;
+}
+
+.ui-text {
+    position: absolute;
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1;
+    transform-style: preserve-3d;
+    color: white;
+}
+
+#text-echo {
+    top: 15%;
+    left: 10%;
+    font-size: 10rem;
+    z-index: 6;
+    transform: translateZ(80px);
+}
+
+#text-the {
+    top: 25%;
+    left: 55%;
+    font-size: 5rem;
+    opacity: 0.7;
+    z-index: 4;
+    transform: translateZ(-50px);
+}
+
+#text-mind {
+    top: 45%;
+    left: 15%;
+    font-size: 8rem;
+    opacity: 0.8;
+    z-index: 4;
+    transform: translateZ(-30px);
+}
+
+#text-within {
+    top: 55%;
+    left: 60%;
+    font-size: 9rem;
+    z-index: 6;
+    transform: translateZ(60px);
+}
+
+.brand-info {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+    opacity: 0.7;
+}
+
+    .brand-info h3 {
+        margin: 0;
+        font-size: 1.8rem;
+        letter-spacing: 0.1em;
+    }
+
+    .brand-info p {
+        margin: 0;
+        font-size: 0.9rem;
+        letter-spacing: 0.05em;
+    }
+
+.menu-button {
+    /* 這裡移除絕對定位，改由外部容器控制 */
+    padding: 10px 30px;
+    background: var(--accent-color);
+    color: var(--main-bg-color);
+    border: none;
+    border-radius: 20px;
+    font-weight: 700;
+    z-index: 10;
+    pointer-events: auto; /* 確保可點擊 */
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+    .menu-button:hover {
+        transform: scale(1.05);
+    }
+
+/* 【新增】Phase 1 登入區塊樣式 */
+.auth-container {
+    position: absolute;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    z-index: 20;
+    pointer-events: auto; /* 關鍵：讓輸入框和訪客按鈕可以被操作 */
+}
+
+.auth-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.auth-input {
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #fff;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    outline: none;
+    width: 200px;
+    text-align: center;
+    font-family: var(--font-display);
+    pointer-events: auto;
+}
+
+.guest-button {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-family: var(--font-display);
+    transition: all 0.2s;
+    pointer-events: auto;
+}
+
+    .guest-button:hover {
+        color: white;
+        border-color: white;
+    }
+
+/* Phase 2 UI */
+.phase-2-ui {
+    width: 100%;
+    height: 100%;
+    z-index: 12;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#spotify-title-stage2 {
+    font-family: var(--font-display);
+    font-size: 10rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--main-text-color);
+}
+
+/* ---------------- */
+/* 3. 階段 3 (UI) */
+/* ---------------- */
+.phase-3-ui {
+    width: 100%;
+    height: 100%;
+    z-index: 12;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#spotify-title-stage3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--main-text-color);
+    margin-top: 30px;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.phase-3-label-container {
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 50px;
+    width: 100%;
+}
+
+.phase-3-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--main-text-color);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+/* ---------------- */
+/* 4. 階段 4 (Modal) */
+/* ---------------- */
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease;
+}
+
+.modal-content {
+    width: 50%;
+    height: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    transform: scale(0.8);
+    pointer-events: auto;
+    padding: 20px;
+}
+
+    .modal-content h3 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.2rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 0 0 30px 0;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+.modal-ai-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 80%;
+}
+
+    .modal-ai-buttons button {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.5rem;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .modal-ai-buttons button:hover {
+            background: var(--accent-color);
+            color: var(--main-bg-color);
+        }
+
+.modal-weather-detect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    height: 100%;
+}
+
+    .modal-weather-detect button {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.5rem;
+        padding: 15px 30px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .modal-weather-detect button:hover {
+            background: var(--accent-color);
+            color: var(--main-bg-color);
+        }
+
+.modal-weather-loading {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.modal-weather-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+    .modal-weather-result p {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        color: white;
+        margin: 5px 0;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+        .modal-weather-result p strong {
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+
+    .modal-weather-result button.confirm-button {
+        background: var(--accent-color);
+        color: var(--main-bg-color);
+        margin-top: 20px;
+    }
+
+.modal-error {
+    font-size: 1rem;
+    color: #FF5555;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.modal-playlist-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 80%;
+}
+
+    .modal-playlist-buttons button {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.5rem;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .modal-playlist-buttons button:hover {
+            background: var(--accent-color);
+            color: var(--main-bg-color);
+        }
+
+
+/* ---------------- */
+/* 5. 階段 5 (UI) */
+/* ---------------- */
+.playlist-ui-container {
+    position: absolute;
+    top: 50%;
+    right: 5%;
+    transform: translateY(-50%);
+    width: 40%;
+    height: 70%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 20;
+    pointer-events: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+    .playlist-ui-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .playlist-ui-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+    }
+
+.song-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.song-item {
+    font-family: var(--font-display);
+    color: var(--main-text-color);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+    padding: 10px 15px;
+    width: 90%;
+    max-width: 400px;
+    opacity: 0.5;
+    transform: scale(1.0);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    text-align: center;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+}
+
+    .song-item h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 5px 0;
+        color: var(--accent-color);
+        line-height: 1.2;
+    }
+
+    .song-item p {
+        font-size: 1.0rem;
+        font-weight: 400;
+        margin: 0;
+        opacity: 0.8;
+        line-height: 1.2;
+    }
+
+    .song-item.is-selected {
+        opacity: 1.0;
+        transform: scale(1.1);
+    }
+
+.back-button {
+    position: absolute;
+    top: 30px;
+    right: 5%;
+    z-index: 20;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.0rem;
+    color: var(--main-text-color);
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: all 0.2s ease;
+}
+
+    .back-button:hover {
+        background: var(--accent-color);
+        color: var(--main-bg-color);
+        border-color: var(--accent-color);
+    }
+
+
+/* ---------------- */
+/* 6. 階段 5 (Audio) */
+/* ---------------- */
+.audio-player {
+    position: absolute;
+    z-index: 20;
+    bottom: 20px;
+    left: 30px;
+    width: 30%;
+    max-width: 400px;
+    min-width: 300px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s ease;
+    pointer-events: none;
+}
+
+    .audio-player.is-visible {
+        opacity: 0.8;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .audio-player::-webkit-media-controls-panel {
+        background-color: rgba(0, 0, 0, 0.7);
+        border: 1px solid var(--accent-color);
+        border-radius: 5px;
+    }
+
+    .audio-player::-webkit-media-controls-play-button,
+    .audio-player::-webkit-media-controls-current-time-display,
+    .audio-player::-webkit-media-controls-time-remaining-display,
+    .audio-player::-webkit-media-controls-mute-button,
+    .audio-player::-webkit-media-controls-volume-slider {
+        color: var(--accent-color);
+    }
+
+    .audio-player::-webkit-media-controls-timeline {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+    }
+
+/* ---------------- */
+/* 7. Phase 6 留言牆 (新增) */
+/* ---------------- */
+.phase6-input {
+    padding: 10px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    border: none;
+    width: 300px;
+    pointer-events: auto; /* 確保可輸入 */
+}
+
+.phase6-btn {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    border: none;
+    background: #FFD700;
+    cursor: pointer;
+    pointer-events: auto; /* 確保可點擊 */
+    font-weight: bold;
+}
