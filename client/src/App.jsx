@@ -56,7 +56,7 @@ function App() {
   useEffect(() => {
     const fetchToken = async () => {
       try {
-          const response = await fetch('https://one14-1-spotify-project.onrender.com');
+          const response = await fetch('https://one14-1-spotify-project.onrender.com/api/get-token');
         if (!response.ok) throw new Error("API Error");
         const data = await response.json();
         if (data.access_token) setAccessToken(data.access_token);
