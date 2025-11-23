@@ -14,7 +14,6 @@ import ModalOverlay from './components/ModalOverlay.jsx';
 import PlaylistUI from './components/PlaylistUI.jsx';
 import BackButton from './components/BackButton.jsx';
 
-// [修改 2] 請在此填入您的 Firebase 設定
 const firebaseConfig = {
     apiKey: "AIzaSyBZmXt6xfFFZ29eDGG-7tHzT7MtJsc7eQE",
     authDomain: "spoti-24a7e.firebaseapp.com",
