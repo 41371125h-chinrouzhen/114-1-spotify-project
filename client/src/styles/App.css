@@ -1,8 +1,6 @@
 /* --- /client/src/styles/App.css --- */
 
-/* ---------------- */
 /* 0. 根目錄 & 框架 */
-/* ---------------- */
 *, *:before, *:after {
     box-sizing: border-box;
 }
@@ -19,6 +17,13 @@ body {
     overflow: hidden;
     background-color: var(--main-bg-color);
     color: var(--main-text-color);
+    font-family: sans-serif;
+    /* [修改 4] 背景圖片設定 */
+    background-image: url('/background.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 #root {
@@ -27,6 +32,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    /* 加上半透明遮罩讓文字清楚一點 */
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .frame-container {
@@ -36,11 +43,11 @@ body {
     border-radius: 20px;
     position: relative;
     overflow: hidden;
+    background: rgba(0, 0, 0, 0.3); /* 容器內再深一點 */
+    backdrop-filter: blur(5px); /* 磨砂玻璃效果 */
 }
 
-/* ---------------- */
 /* 1. 核心佈局 (Z-Index) */
-/* ---------------- */
 .canvas-container {
     position: absolute;
     top: 0;
@@ -59,17 +66,14 @@ body {
     height: 100%;
     z-index: 10;
     overflow: hidden;
-    pointer-events: none; /* 預設不阻擋滑鼠，重要！ */
+    pointer-events: none;
 }
 
     .scroll-container.at-stage-5 {
         pointer-events: auto;
     }
 
-
-/* ---------------- */
-/* 2. 階段 1 & 2 (UI) */
-/* ---------------- */
+/* 2. UI 通用設定 */
 .ui-stage {
     position: absolute;
     top: 0;
@@ -80,10 +84,10 @@ body {
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
-    /* 加入轉場讓顯示/隱藏更平滑 */
     transition: opacity 1s ease, visibility 1s ease;
 }
 
+/* Phase 1 UI */
 .phase-1-ui {
     z-index: 10;
 }
@@ -155,7 +159,6 @@ body {
     }
 
 .menu-button {
-    /* 這裡移除絕對定位，改由外部容器控制 */
     padding: 10px 30px;
     background: var(--accent-color);
     color: var(--main-bg-color);
@@ -163,7 +166,7 @@ body {
     border-radius: 20px;
     font-weight: 700;
     z-index: 10;
-    pointer-events: auto; /* 確保可點擊 */
+    pointer-events: auto;
     cursor: pointer;
     transition: transform 0.2s;
 }
@@ -172,7 +175,7 @@ body {
         transform: scale(1.05);
     }
 
-/* 【新增】Phase 1 登入區塊樣式 */
+/* Phase 1 Auth Styles */
 .auth-container {
     position: absolute;
     bottom: 120px;
@@ -183,7 +186,7 @@ body {
     gap: 15px;
     align-items: center;
     z-index: 20;
-    pointer-events: auto; /* 關鍵：讓輸入框和訪客按鈕可以被操作 */
+    pointer-events: auto;
 }
 
 .auth-input-group {
@@ -222,8 +225,8 @@ body {
         border-color: white;
     }
 
-/* Phase 2 UI */
-.phase-2-ui {
+/* Phase 2 & 3 */
+.phase-2-ui, .phase-3-ui {
     width: 100%;
     height: 100%;
     z-index: 12;
@@ -232,25 +235,16 @@ body {
     justify-content: center;
 }
 
+.phase-3-ui {
+    align-items: flex-start;
+}
+
 #spotify-title-stage2 {
     font-family: var(--font-display);
     font-size: 10rem;
     font-weight: 700;
     margin: 0;
     color: var(--main-text-color);
-}
-
-/* ---------------- */
-/* 3. 階段 3 (UI) */
-/* ---------------- */
-.phase-3-ui {
-    width: 100%;
-    height: 100%;
-    z-index: 12;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    pointer-events: none;
 }
 
 #spotify-title-stage3 {
@@ -289,9 +283,7 @@ body {
     transform: translateY(10px);
 }
 
-/* ---------------- */
-/* 4. 階段 4 (Modal) */
-/* ---------------- */
+/* Phase 4 Modal */
 .modal-overlay {
     position: absolute;
     top: 0;
@@ -321,8 +313,6 @@ body {
     align-items: center;
     justify-content: center;
     font-family: var(--font-display);
-    font-size: 2rem;
-    transform: scale(0.8);
     pointer-events: auto;
     padding: 20px;
 }
@@ -339,62 +329,30 @@ body {
         flex-shrink: 0;
     }
 
-.modal-ai-buttons {
+.modal-ai-buttons button, .modal-playlist-buttons button {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 10px;
+    margin: 5px 0;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .modal-ai-buttons button:hover, .modal-playlist-buttons button:hover {
+        background: var(--accent-color);
+        color: black;
+    }
+
+.modal-ai-buttons, .modal-weather-detect, .modal-playlist-buttons {
     display: flex;
     flex-direction: column;
     gap: 15px;
     width: 80%;
-}
-
-    .modal-ai-buttons button {
-        font-family: var(--font-display);
-        font-weight: 700;
-        font-size: 1.5rem;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: white;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-        .modal-ai-buttons button:hover {
-            background: var(--accent-color);
-            color: var(--main-bg-color);
-        }
-
-.modal-weather-detect {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 90%;
-    height: 100%;
-}
-
-    .modal-weather-detect button {
-        font-family: var(--font-display);
-        font-weight: 700;
-        font-size: 1.5rem;
-        padding: 15px 30px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: white;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-        .modal-weather-detect button:hover {
-            background: var(--accent-color);
-            color: var(--main-bg-color);
-        }
-
-.modal-weather-loading {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    color: rgba(255, 255, 255, 0.7);
 }
 
 .modal-weather-result {
@@ -414,53 +372,19 @@ body {
         border-radius: 5px;
     }
 
-        .modal-weather-result p strong {
-            color: var(--accent-color);
-            margin-right: 10px;
-        }
-
-    .modal-weather-result button.confirm-button {
-        background: var(--accent-color);
-        color: var(--main-bg-color);
-        margin-top: 20px;
-    }
-
-.modal-error {
-    font-size: 1rem;
-    color: #FF5555;
-    margin-top: 20px;
-    text-align: center;
+.modal-weather-detect button {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
-.modal-playlist-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 80%;
-}
-
-    .modal-playlist-buttons button {
-        font-family: var(--font-display);
-        font-weight: 700;
-        font-size: 1.5rem;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: white;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-        .modal-playlist-buttons button:hover {
-            background: var(--accent-color);
-            color: var(--main-bg-color);
-        }
-
-
-/* ---------------- */
-/* 5. 階段 5 (UI) */
-/* ---------------- */
+/* Phase 5 Playlist */
 .playlist-ui-container {
     position: absolute;
     top: 50%;
@@ -471,13 +395,11 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     z-index: 20;
     pointer-events: auto;
-    overflow-x: hidden;
     overflow-y: auto;
 }
 
@@ -501,22 +423,16 @@ body {
 
 .song-item {
     font-family: var(--font-display);
-    color: var(--main-text-color);
+    color: white;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 5px;
     padding: 10px 15px;
     width: 90%;
     max-width: 400px;
-    opacity: 0.5;
-    transform: scale(1.0);
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-    text-align: center;
-    min-height: 70px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    margin: 5px 0;
     cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.3s ease;
 }
 
     .song-item h3 {
@@ -524,7 +440,6 @@ body {
         font-weight: 700;
         margin: 0 0 5px 0;
         color: var(--accent-color);
-        line-height: 1.2;
     }
 
     .song-item p {
@@ -532,12 +447,6 @@ body {
         font-weight: 400;
         margin: 0;
         opacity: 0.8;
-        line-height: 1.2;
-    }
-
-    .song-item.is-selected {
-        opacity: 1.0;
-        transform: scale(1.1);
     }
 
 .back-button {
@@ -561,62 +470,16 @@ body {
     .back-button:hover {
         background: var(--accent-color);
         color: var(--main-bg-color);
-        border-color: var(--accent-color);
     }
 
-
-/* ---------------- */
-/* 6. 階段 5 (Audio) */
-/* ---------------- */
-.audio-player {
-    position: absolute;
-    z-index: 20;
-    bottom: 20px;
-    left: 30px;
-    width: 30%;
-    max-width: 400px;
-    min-width: 300px;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.5s ease;
-    pointer-events: none;
-}
-
-    .audio-player.is-visible {
-        opacity: 0.8;
-        visibility: visible;
-        pointer-events: auto;
-    }
-
-    .audio-player::-webkit-media-controls-panel {
-        background-color: rgba(0, 0, 0, 0.7);
-        border: 1px solid var(--accent-color);
-        border-radius: 5px;
-    }
-
-    .audio-player::-webkit-media-controls-play-button,
-    .audio-player::-webkit-media-controls-current-time-display,
-    .audio-player::-webkit-media-controls-time-remaining-display,
-    .audio-player::-webkit-media-controls-mute-button,
-    .audio-player::-webkit-media-controls-volume-slider {
-        color: var(--accent-color);
-    }
-
-    .audio-player::-webkit-media-controls-timeline {
-        background-color: rgba(255, 255, 255, 0.2);
-        border-radius: 4px;
-    }
-
-/* ---------------- */
-/* 7. Phase 6 留言牆 (新增) */
-/* ---------------- */
+/* Phase 6 Message Wall UI */
 .phase6-input {
     padding: 10px;
     font-size: 1.2rem;
     border-radius: 5px;
     border: none;
     width: 300px;
-    pointer-events: auto; /* 確保可輸入 */
+    pointer-events: auto;
 }
 
 .phase6-btn {
@@ -626,6 +489,25 @@ body {
     border: none;
     background: #FFD700;
     cursor: pointer;
-    pointer-events: auto; /* 確保可點擊 */
+    pointer-events: auto;
     font-weight: bold;
 }
+
+/* Audio Player */
+.audio-player {
+    position: absolute;
+    z-index: 20;
+    bottom: 20px;
+    left: 30px;
+    width: 30%;
+    min-width: 300px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease;
+    pointer-events: auto;
+}
+
+    .audio-player.is-visible {
+        opacity: 0.8;
+        visibility: visible;
+    }

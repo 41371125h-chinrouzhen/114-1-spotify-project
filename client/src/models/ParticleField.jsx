@@ -3,59 +3,46 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 const ParticleField = ({ currentStage }) => {
-    const count = 500; // 粒子數量
+    // [修改 4] 數量減少，模擬稀疏的流星
+    const count = 50;
     const mesh = useRef();
 
-    // 1. 產生隨機位置的粒子
     const particles = useMemo(() => {
         const temp = [];
         for (let i = 0; i < count; i++) {
-            const t = Math.random() * 100;
-            const factor = 20 + Math.random() * 100;
-            const speed = 0.01 + Math.random() / 200;
-            const x = (Math.random() - 0.5) * 20; // 隨機 X
-            const y = (Math.random() - 0.5) * 20; // 隨機 Y
-            const z = (Math.random() - 0.5) * 10 - 5; // 隨機 Z (放在背景)
-            temp.push({ t, factor, speed, x, y, z, mx: 0, my: 0 });
+            const x = (Math.random() - 0.5) * 50;
+            const y = (Math.random() - 0.5) * 50;
+            const z = (Math.random() - 0.5) * 20 - 10;
+            // [修改 4] 速度加快
+            const speed = 0.3 + Math.random() * 0.5;
+            const length = 1.0 + Math.random() * 3.0;
+            temp.push({ x, y, z, speed, length });
         }
         return temp;
     }, []);
 
-    // 2. 這是 Three.js 的 "Dummy" 物件，用來優化效能
     const dummy = useMemo(() => new THREE.Object3D(), []);
 
-    // 3. 動畫迴圈
-    useFrame((state) => {
+    useFrame(() => {
         if (!mesh.current) return;
 
         particles.forEach((particle, i) => {
-            let { t, factor, speed, x, y, z } = particle;
+            // 往左下飛
+            particle.x -= particle.speed;
+            particle.y -= particle.speed * 0.6;
 
-            // 更新時間因子
-            t = particle.t += speed / 2;
-
-            // 根據 Stage 改變運動模式
-            if (currentStage === 5) {
-                // 音樂模式：粒子動得比較快，且會旋轉
-                const s = Math.cos(t);
-                dummy.position.set(
-                    x + Math.cos((t / 10) * factor) + (Math.sin(t * 1) * factor) / 10,
-                    y + Math.sin((t / 10) * factor) + (Math.cos(t * 2) * factor) / 10,
-                    z + Math.cos((t / 10) * factor) + (Math.sin(t * 3) * factor) / 10
-                );
-                dummy.rotation.set(s * 5, s * 5, s * 5);
-                dummy.scale.set(s, s, s);
-            } else {
-                // 選單模式：粒子緩慢漂浮
-                const s = Math.cos(t);
-                dummy.position.set(
-                    x + Math.cos((t / 30) * factor) + (Math.sin(t * 1) * factor) / 30,
-                    y + Math.sin((t / 30) * factor) + (Math.cos(t * 2) * factor) / 30,
-                    z
-                );
-                dummy.rotation.set(s, s, s);
-                dummy.scale.set(s * 0.5, s * 0.5, s * 0.5);
+            // 循環
+            if (particle.x < -25 || particle.y < -25) {
+                particle.x = 25 + Math.random() * 10;
+                particle.y = 25 + Math.random() * 10;
             }
+
+            dummy.position.set(particle.x, particle.y, particle.z);
+            // 調整角度以配合飛行方向
+            dummy.rotation.z = Math.PI / 3;
+
+            const scale = currentStage === 5 ? 1.5 : 1.0;
+            dummy.scale.set(particle.length * scale, 0.1 * scale, 0.1 * scale);
 
             dummy.updateMatrix();
             mesh.current.setMatrixAt(i, dummy.matrix);
@@ -65,14 +52,9 @@ const ParticleField = ({ currentStage }) => {
 
     return (
         <instancedMesh ref={mesh} args={[null, null, count]}>
-            <dodecahedronGeometry args={[0.05, 0]} />
-            <meshStandardMaterial
-                color={currentStage === 5 ? "#1ED760" : "#ffffff"} // Stage 5 變綠色
-                roughness={0.5}
-                metalness={0.5}
-                transparent
-                opacity={0.6}
-            />
+            <boxGeometry args={[1, 1, 1]} />
+            {/* [修改 4] 黃色流星 */}
+            <meshBasicMaterial color="#FFFF00" transparent opacity={0.6} />
         </instancedMesh>
     );
 };
