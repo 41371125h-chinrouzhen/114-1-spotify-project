@@ -9,61 +9,25 @@ import ParticleField from './ParticleField.jsx';
 import ErrorBoundary from '../components/ErrorBoundary.jsx';
 
 function Scene({ currentStage, selectedSphereIndex, onModalOpen, onWheel, songCoverUrl, WallContent }) {
-
     return (
-        <Canvas
-            camera={{ position: [0, 0, 5], fov: 60 }}
-            gl={{ alpha: true }}
-            onWheel={onWheel}
-        >
-
+        <Canvas camera={{ position: [0, 0, 5], fov: 60 }} gl={{ alpha: true }} onWheel={onWheel}>
             <ambientLight intensity={1.0} />
             <directionalLight position={[5, 10, 5]} intensity={2.0} />
-
-            {/* Stage 5 專用燈光 (綠色氛圍) */}
-            {currentStage === 5 && (
-                <pointLight position={[-1, 1, 2]} intensity={5.0} distance={15} color="#1ED760" />
-            )}
-
-            {/* Stage 6 專用燈光 (金色氛圍) */}
-            {currentStage === 6 && (
-                <pointLight position={[0, 0, 5]} intensity={3.0} color="#FFD700" />
-            )}
+            {currentStage === 5 && <pointLight position={[-1, 1, 2]} intensity={5.0} distance={15} color="#1ED760" />}
+            {currentStage === 6 && <pointLight position={[0, 0, 5]} intensity={3.0} color="#FFD700" />}
 
             <ErrorBoundary>
                 <Suspense fallback={null}>
-
-                    {/* 全域背景：流星雨特效 */}
                     <ParticleField currentStage={currentStage} />
-
-                    {/* Stage 1-2: Logo */}
                     {currentStage <= 2 && <Phase1_3D currentStage={currentStage} />}
-
-                    {/* Stage 2-4: 選單球體 */}
                     {currentStage >= 2 && currentStage <= 4 && (
-                        <Phase3_3D
-                            currentStage={currentStage}
-                            selectedSphereIndex={selectedSphereIndex}
-                            onModalOpen={onModalOpen}
-                        />
+                        <Phase3_3D currentStage={currentStage} selectedSphereIndex={selectedSphereIndex} onModalOpen={onModalOpen} />
                     )}
-
-                    {/* Stage 5: 黑膠唱片 */}
-                    {currentStage === 5 && (
-                        <VinylModel
-                            currentStage={currentStage}
-                            songCoverUrl={songCoverUrl}
-                        />
-                    )}
-
-                    {/* Stage 6: 留言牆 3D 內容 (從 App.jsx 傳入) */}
+                    {currentStage === 5 && <VinylModel currentStage={currentStage} songCoverUrl={songCoverUrl} />}
                     {currentStage === 6 && WallContent}
-
                 </Suspense>
             </ErrorBoundary>
-
             <Environment preset="city" background={false} />
-
         </Canvas>
     );
 }

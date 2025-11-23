@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 
-// --- 設定 ---
 const buildSearchQuery = (payload) => {
     if (!payload) return "Top 50 Global";
     switch (payload.type) {
@@ -8,7 +7,7 @@ const buildSearchQuery = (payload) => {
             if (payload.region === 'Mandarin') return "Mandarin Hits";
             if (payload.region === 'English') return "Global Top Chart";
             return "Top 50 Global";
-        case 'MOOD': // 修正：對應新的 Mood Station
+        case 'MOOD':
             return `${payload.mood} vibes`;
         case 'Weather':
             return `${payload.weather} chill songs`;
@@ -26,7 +25,9 @@ function PlaylistUI({
     onPreviewChange,
     selectedSongIndex,
     onListLoaded,
-    onSongClick
+    onSongClick,
+    onLike,
+    isGuest
 }) {
     const containerRef = useRef();
     const listWrapperRef = useRef();
@@ -34,6 +35,7 @@ function PlaylistUI({
     const [isLoading, setIsLoading] = useState(true);
     const [isVisible, setIsVisible] = useState(false);
     const [searchingAudio, setSearchingAudio] = useState(false);
+    const [likedSongs, setLikedSongs] = useState(new Set());
 
     const songItemRefs = useRef(new Map());
     const setSongItemRef = useCallback((node, id) => {
@@ -41,7 +43,6 @@ function PlaylistUI({
         else songItemRefs.current.delete(id);
     }, []);
 
-    // --- 進場動畫 ---
     useEffect(() => {
         if (currentStage === 5) {
             const timer = setTimeout(() => setIsVisible(true), 700);
@@ -56,13 +57,10 @@ function PlaylistUI({
 
     useEffect(() => {
         if (currentStage === 5 && accessToken) {
-            console.log("PlaylistUI: 偵測到 Stage 5...");
             fetchSpotifyData(stage5Payload);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentStage, accessToken, stage5Payload]);
 
-    // --- iTunes 救援 ---
     const fetchItunesPreview = async (title, artist) => {
         try {
             const term = encodeURIComponent(`${title} ${artist}`);
@@ -78,8 +76,6 @@ function PlaylistUI({
     const fetchSpotifyData = async (payload) => {
         setIsLoading(true);
         const query = buildSearchQuery(payload);
-        console.log("[PlaylistUI] 搜尋:", query);
-
         const url = `${API_BASE_URL}/search?q=${encodeURIComponent(query)}&type=track&limit=50`;
 
         try {
@@ -95,10 +91,9 @@ function PlaylistUI({
                 artist: item.artists.map(a => a.name).join(', '),
                 coverUrl: (item.album.images && item.album.images[0]?.url) || null,
                 preview_url: item.preview_url,
-                popularity: item.popularity // 取得熱度數據 (0-100)
+                popularity: item.popularity
             }));
 
-            // 去重
             const uniqueKey = (t) => t.title + '::' + t.artist;
             const uniqueTracks = Array.from(new Map(tracks.map(t => [uniqueKey(t), t])).values());
 
@@ -135,12 +130,26 @@ function PlaylistUI({
             if (onPreviewChange) onPreviewChange(null);
             const itunesUrl = await fetchItunesPreview(song.title, song.artist);
             setSearchingAudio(false);
-
             if (itunesUrl) {
                 if (onPreviewChange) onPreviewChange(itunesUrl);
             } else {
                 alert(`無法取得「${song.title}」的試聽片段。`);
             }
+        }
+    };
+
+    const handleHeartClick = (e, song) => {
+        e.stopPropagation();
+        if (isGuest) {
+            alert("Guest mode cannot save likes. Please login.");
+            return;
+        }
+
+        const newLiked = new Set(likedSongs);
+        if (!newLiked.has(song.id)) {
+            newLiked.add(song.id);
+            setLikedSongs(newLiked);
+            if (onLike) onLike(song);
         }
     };
 
@@ -159,10 +168,9 @@ function PlaylistUI({
                 ) : songs.length > 0 ? (
                     songs.map((song, index) => {
                         const isSelected = (index === selectedSongIndex);
-
-                        // 熱度顏色計算 (綠 -> 黃 -> 紅)
-                        const heatColor = song.popularity > 80 ? '#ff5555' : song.popularity > 50 ? '#ffbf00' : '#1ED760';
+                        const heatColor = song.popularity > 60 ? '#ff5555' : song.popularity > 40 ? '#ffbf00' : '#1ED760';
                         const heatWidth = `${song.popularity}%`;
+                        const isLiked = likedSongs.has(song.id);
 
                         const itemStyle = {
                             cursor: 'pointer',
@@ -170,7 +178,8 @@ function PlaylistUI({
                             transform: isSelected ? "scale(1.02)" : "scale(1.0)",
                             backgroundColor: isSelected ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.02)",
                             transition: "all 0.3s ease",
-                            borderLeft: isSelected ? `4px solid ${heatColor}` : '4px solid transparent'
+                            borderLeft: isSelected ? `4px solid ${heatColor}` : '4px solid transparent',
+                            position: 'relative'
                         };
 
                         return (
@@ -187,29 +196,28 @@ function PlaylistUI({
                                             <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>{song.title}</h3>
                                             <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{song.artist}</p>
                                         </div>
-                                        {isSelected && searchingAudio && <span style={{ fontSize: '0.8rem' }}>🔍</span>}
-                                    </div>
 
-                                    {/* 數據視覺化：人氣熱度條 */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <button
+                                                onClick={(e) => handleHeartClick(e, song)}
+                                                style={{
+                                                    background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem',
+                                                    color: isLiked ? '#ff5555' : '#888', transition: 'color 0.2s'
+                                                }}
+                                            >
+                                                {isLiked ? '❤️' : '🤍'}
+                                            </button>
+                                            {isSelected && searchingAudio && <span style={{ fontSize: '0.8rem' }}>🔍</span>}
+                                        </div>
+                                    </div>
                                     <div style={{
-                                        marginTop: '8px',
-                                        width: '100%',
-                                        height: '4px',
-                                        background: 'rgba(255,255,255,0.1)',
-                                        borderRadius: '2px',
-                                        overflow: 'hidden',
-                                        display: 'flex',
-                                        alignItems: 'center'
+                                        marginTop: '8px', width: '100%', height: '4px',
+                                        background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden'
                                     }}>
                                         <div style={{
-                                            width: heatWidth,
-                                            height: '100%',
-                                            background: heatColor,
-                                            boxShadow: `0 0 10px ${heatColor}`
+                                            width: heatWidth, height: '100%', background: heatColor,
+                                            boxShadow: `0 0 8px ${heatColor}`
                                         }}></div>
-                                    </div>
-                                    <div style={{ textAlign: 'right', fontSize: '0.6rem', marginTop: '2px', opacity: 0.5 }}>
-                                        POPULARITY: {song.popularity}
                                     </div>
                                 </div>
                             </div>

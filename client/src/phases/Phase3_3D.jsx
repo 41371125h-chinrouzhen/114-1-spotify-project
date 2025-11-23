@@ -3,20 +3,20 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 const THEME_COLORS = [
-    new THREE.Color("#1ED760"), // 0: Playlist (Green)
-    new THREE.Color("#8A2BE2"), // 1: Mood (Purple)
-    new THREE.Color("#4169E1"), // 2: Weather (Blue)
-    new THREE.Color("#FFD700"), // 3: Message Wall (Gold)
-    new THREE.Color("#00FFFF"), // 4: AI Recommend (Cyan) - [修改 5] 新增
+    new THREE.Color("#1ED760"),
+    new THREE.Color("#8A2BE2"),
+    new THREE.Color("#4169E1"),
+    new THREE.Color("#FFD700"),
+    new THREE.Color("#00FFFF"),
 ];
 
-// 五邊形排列 (72度間隔)
+// [需求 2] 縮小所有球體 0.8 倍
 const slots = [
-    { position: new THREE.Vector3(0, 0, 1.5), scale: 1.0, opacity: 1.0 },    // 0: Front
-    { position: new THREE.Vector3(2.0, 0, 0), scale: 0.6, opacity: 0.6 },    // 1: Right Front
-    { position: new THREE.Vector3(1.2, 0, -2), scale: 0.4, opacity: 0.3 },   // 2: Right Back
-    { position: new THREE.Vector3(-1.2, 0, -2), scale: 0.4, opacity: 0.3 },  // 3: Left Back
-    { position: new THREE.Vector3(-2.0, 0, 0), scale: 0.6, opacity: 0.6 },   // 4: Left Front
+    { position: new THREE.Vector3(0, 0, 1.5), scale: 0.8, opacity: 1.0 },
+    { position: new THREE.Vector3(2.0, 0, 0), scale: 0.48, opacity: 0.6 },
+    { position: new THREE.Vector3(1.2, 0, -2), scale: 0.32, opacity: 0.3 },
+    { position: new THREE.Vector3(-1.2, 0, -2), scale: 0.32, opacity: 0.3 },
+    { position: new THREE.Vector3(-2.0, 0, 0), scale: 0.48, opacity: 0.6 },
 ];
 
 const AnimatedSphere = ({ index, selectedSphereIndex, currentStage, geometry, onClick, onModalOpen }) => {
@@ -27,7 +27,6 @@ const AnimatedSphere = ({ index, selectedSphereIndex, currentStage, geometry, on
         if (currentStage !== 3) {
             return { position: new THREE.Vector3(0, 0, 0), scale: 0, opacity: 0 };
         }
-        // [修改 5] 5 顆球輪替邏輯
         const targetSlotIndex = (index - selectedSphereIndex + 5) % 5;
         return slots[targetSlotIndex];
     }, [index, selectedSphereIndex, currentStage]);
@@ -69,7 +68,6 @@ function Phase3Scene({ currentStage, selectedSphereIndex, onModalOpen }) {
 
     return (
         <group>
-            {/* [修改 5] 渲染 5 顆球 (0-4) */}
             {[0, 1, 2, 3, 4].map((i) => (
                 <AnimatedSphere
                     key={i}

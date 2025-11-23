@@ -18,7 +18,7 @@ body {
     background-color: var(--main-bg-color);
     color: var(--main-text-color);
     font-family: sans-serif;
-    /* [修改 4] 背景圖片設定 */
+    /* 背景圖片設定 */
     background-image: url('/background.png');
     background-repeat: no-repeat;
     background-position: center center;
@@ -32,8 +32,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    /* 加上半透明遮罩讓文字清楚一點 */
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.6); /* 遮罩 */
 }
 
 .frame-container {
@@ -43,8 +42,8 @@ body {
     border-radius: 20px;
     position: relative;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.3); /* 容器內再深一點 */
-    backdrop-filter: blur(5px); /* 磨砂玻璃效果 */
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
 }
 
 /* 1. 核心佈局 (Z-Index) */

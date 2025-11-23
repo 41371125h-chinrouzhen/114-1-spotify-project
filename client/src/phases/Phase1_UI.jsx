@@ -4,7 +4,6 @@ function Phase1_UI({ currentStage, onNextStage, isLoading, onLogin }) {
     const [nameInput, setNameInput] = useState("");
     const [visible, setVisible] = useState(false);
 
-    // 進場動畫
     useEffect(() => {
         const timer = setTimeout(() => setVisible(true), 500);
         return () => clearTimeout(timer);
@@ -26,7 +25,6 @@ function Phase1_UI({ currentStage, onNextStage, isLoading, onLogin }) {
 
     const isHidden = currentStage !== 1;
 
-    // 容器樣式
     const containerStyle = {
         opacity: visible && !isHidden ? 1 : 0,
         visibility: visible && !isHidden ? 'visible' : 'hidden',
@@ -35,7 +33,6 @@ function Phase1_UI({ currentStage, onNextStage, isLoading, onLogin }) {
 
     return (
         <div className="phase-1-ui ui-stage" style={containerStyle}>
-            {/* 背景文字 */}
             <span id="text-echo" className="ui-text">ECHO</span>
             <span id="text-the" className="ui-text">THE</span>
             <span id="text-mind" className="ui-text">MIND</span>
@@ -46,9 +43,7 @@ function Phase1_UI({ currentStage, onNextStage, isLoading, onLogin }) {
                 <p>SYNC. FEEL. FLOW.</p>
             </div>
 
-            {/* 登入區塊：使用 App.css 定義的 .auth-container */}
             <div className="auth-container">
-
                 <div className="auth-input-group">
                     <input
                         type="text"
@@ -73,7 +68,6 @@ function Phase1_UI({ currentStage, onNextStage, isLoading, onLogin }) {
                 >
                     CONTINUE AS GUEST
                 </button>
-
             </div>
         </div>
     );

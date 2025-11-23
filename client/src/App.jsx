@@ -1,12 +1,10 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
 import './styles/App.css';
 
-// Firebase Imports
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, onAuthStateChanged, updateProfile } from "firebase/auth";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 
-// Components
 import Scene from './models/Scene.jsx';
 import Phase1_UI from './phases/Phase1_UI.jsx';
 import Phase2_UI from './phases/Phase2_UI.jsx';
@@ -16,18 +14,15 @@ import ModalOverlay from './components/ModalOverlay.jsx';
 import PlaylistUI from './components/PlaylistUI.jsx';
 import BackButton from './components/BackButton.jsx';
 
-// ============================================================================
-// [關鍵修正] 請將您的 Firebase 設定貼在 "App" 函式之外 (最上方)
-// ============================================================================
-const firebaseConfig = {
-    apiKey: "AIzaSyBZmXt6xfFFZ29eDGG-7tHzT7MtJsc7eQE",
-    authDomain: "spoti-24a7e.firebaseapp.com",
-    projectId: "spoti-24a7e",
-    storageBucket: "spoti-24a7e.firebasestorage.app",
-    messagingSenderId: "21554059222",
-    appId: "1:21554059222:web:f5a6c2b1561e7c6456b677"
+// [重要] 請在此填入您的 Firebase 設定
+const LOCAL_FIREBASE_CONFIG = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.firebasestorage.app",
+    messagingSenderId: "...",
+    appId: "..."
 };
-const app = initializeApp(firebaseConfig);
 
 function App() {
     const [user, setUser] = useState(null);
@@ -35,19 +30,11 @@ function App() {
     const [auth, setAuth] = useState(null);
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-    // --- 1. Firebase Initialization ---
     useEffect(() => {
         let config = null;
-
-        // 1. 嘗試讀取雲端環境變數 (Deployment)
         if (typeof __firebase_config !== 'undefined') {
-            try {
-                config = JSON.parse(__firebase_config);
-            } catch (e) { console.error("Config Parse Error:", e); }
-        }
-        // 2. 嘗試讀取本地設定 (Localhost)
-        // 這裡加入了 typeof 檢查，防止變數未定義導致崩潰
-        else if (typeof LOCAL_FIREBASE_CONFIG !== 'undefined' && LOCAL_FIREBASE_CONFIG.apiKey !== "請填入您的_apiKey") {
+            try { config = JSON.parse(__firebase_config); } catch (e) { console.error(e); }
+        } else if (LOCAL_FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY") {
             config = LOCAL_FIREBASE_CONFIG;
         }
 
@@ -58,14 +45,10 @@ function App() {
                 const dbInstance = getFirestore(app);
                 setAuth(authInstance);
                 setDb(dbInstance);
-                signInAnonymously(authInstance).catch((e) => console.error("Auth Error:", e));
+                signInAnonymously(authInstance).catch(console.error);
                 onAuthStateChanged(authInstance, (u) => setUser(u));
-                console.log("✅ Firebase Connected!");
-            } catch (e) {
-                console.error("🔥 Firebase Init Failed:", e);
-            }
-        } else {
-            console.warn("⚠️ 未偵測到有效的 Firebase 設定。請檢查 App.jsx 上方的 LOCAL_FIREBASE_CONFIG 是否已填寫。");
+                console.log("Firebase Initialized");
+            } catch (e) { console.error("Firebase Init Error:", e); }
         }
     }, []);
 
@@ -121,7 +104,7 @@ function App() {
         if (currentStage === 3) {
             if (isWheeling) return;
             setIsWheeling(true);
-            // 5 顆球輪替 (AI球加入)
+            // 5 顆球輪替
             if (e.deltaY > 0) setSelectedSphereIndex((prev) => (prev + 1) % 5);
             else setSelectedSphereIndex((prev) => (prev - 1 + 5) % 5);
             setTimeout(() => setIsWheeling(false), 500);
@@ -130,7 +113,7 @@ function App() {
 
     const handleModalOpen = (index) => {
         if (currentStage !== 3) return;
-        if (index === 3) setCurrentStage(6); // Index 3 是留言牆
+        if (index === 3) setCurrentStage(6);
         else {
             setCurrentStage(4);
             setModal({ isVisible: true, type: index });
@@ -158,7 +141,7 @@ function App() {
     };
 
     const handleLike = async (song) => {
-        if (!db) { alert("資料庫未連線，請檢查 App.jsx"); return; }
+        if (!db) { alert("Database not connected."); return; }
         if (isGuest) return;
         try {
             const likesRef = collection(db, 'artifacts', appId, 'public', 'data', 'likes');
@@ -174,7 +157,7 @@ function App() {
     const handleSendMsg = async () => {
         if (!msgInput.trim()) return;
         if (isGuest) { alert("Please login to send messages."); return; }
-        if (!db) { alert("錯誤：資料庫未連線。請檢查 Firebase 設定是否正確。"); return; }
+        if (!db) { alert("Error: Database not connected. Check LOCAL_FIREBASE_CONFIG."); return; }
 
         try {
             const msgsRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
@@ -185,10 +168,10 @@ function App() {
                 timestamp: serverTimestamp()
             });
             setMsgInput("");
-            // 成功後不特別跳 Alert，保持流暢
+            alert("Sent!");
         } catch (e) {
             console.error("Message failed:", e);
-            alert("error：" + e.message);
+            alert("Failed to send.");
         }
     };
 
