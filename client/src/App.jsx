@@ -14,6 +14,12 @@ import ModalOverlay from './components/ModalOverlay.jsx';
 import PlaylistUI from './components/PlaylistUI.jsx';
 import BackButton from './components/BackButton.jsx';
 
+// [自動判斷後端網址]
+// 開發時用 localhost，部署後用 Render 網址
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3001'
+    : 'https://one14-1-spotify-project.onrender.com'; // 部署前請確認此網址
+
 const firebaseConfig = {
     apiKey: "AIzaSyBZmXt6xfFFZ29eDGG-7tHzT7MtJsc7eQE",
     authDomain: "spoti-24a7e.firebaseapp.com",
@@ -29,11 +35,19 @@ function App() {
     const [auth, setAuth] = useState(null);
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
+    // --- 1. Firebase Initialization ---
     useEffect(() => {
         let config = null;
+
+        // 1. 嘗試讀取雲端環境變數 (Deployment)
         if (typeof __firebase_config !== 'undefined') {
-            try { config = JSON.parse(__firebase_config); } catch (e) { console.error(e); }
-        } else if (LOCAL_FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY") {
+            try {
+                config = JSON.parse(__firebase_config);
+            } catch (e) { console.error("Config Parse Error:", e); }
+        }
+        // 2. 嘗試讀取本地設定 (Localhost)
+        // 這裡加上 typeof 檢查以防萬一，但主要靠上方的 const 宣告
+        else if (typeof LOCAL_FIREBASE_CONFIG !== 'undefined' && LOCAL_FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY") {
             config = LOCAL_FIREBASE_CONFIG;
         }
 
@@ -44,10 +58,14 @@ function App() {
                 const dbInstance = getFirestore(app);
                 setAuth(authInstance);
                 setDb(dbInstance);
-                signInAnonymously(authInstance).catch(console.error);
+                signInAnonymously(authInstance).catch((e) => console.error("Auth Error:", e));
                 onAuthStateChanged(authInstance, (u) => setUser(u));
-                console.log("Firebase Initialized");
-            } catch (e) { console.error("Firebase Init Error:", e); }
+                console.log("✅ Firebase Connected!");
+            } catch (e) {
+                console.error("🔥 Firebase Init Failed:", e);
+            }
+        } else {
+            console.warn("⚠️ 未偵測到有效的 Firebase 設定。請檢查 App.jsx 上方的 LOCAL_FIREBASE_CONFIG 是否已填寫。");
         }
     }, []);
 
@@ -70,7 +88,8 @@ function App() {
     useEffect(() => {
         const fetchToken = async () => {
             try {
-                const response = await fetch('https://one14-1-spotify-project.onrender.com');
+                // 使用動態網址
+                const response = await fetch(`${API_BASE_URL}/api/get-token`);
                 if (!response.ok) throw new Error("API Error");
                 const data = await response.json();
                 if (data.access_token) setAccessToken(data.access_token);
@@ -112,7 +131,7 @@ function App() {
 
     const handleModalOpen = (index) => {
         if (currentStage !== 3) return;
-        if (index === 3) setCurrentStage(6);
+        if (index === 3) setCurrentStage(6); // Index 3 是留言牆
         else {
             setCurrentStage(4);
             setModal({ isVisible: true, type: index });
@@ -140,7 +159,7 @@ function App() {
     };
 
     const handleLike = async (song) => {
-        if (!db) { alert("Database not connected."); return; }
+        if (!db) { alert("資料庫未連線，無法按讚"); return; }
         if (isGuest) return;
         try {
             const likesRef = collection(db, 'artifacts', appId, 'public', 'data', 'likes');
