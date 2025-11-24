@@ -14,14 +14,13 @@ import ModalOverlay from './components/ModalOverlay.jsx';
 import PlaylistUI from './components/PlaylistUI.jsx';
 import BackButton from './components/BackButton.jsx';
 
-// [重要] 請在此填入您的 Firebase 設定
-const LOCAL_FIREBASE_CONFIG = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.firebasestorage.app",
-    messagingSenderId: "...",
-    appId: "..."
+const firebaseConfig = {
+    apiKey: "AIzaSyBZmXt6xfFFZ29eDGG-7tHzT7MtJsc7eQE",
+    authDomain: "spoti-24a7e.firebaseapp.com",
+    projectId: "spoti-24a7e",
+    storageBucket: "spoti-24a7e.firebasestorage.app",
+    messagingSenderId: "21554059222",
+    appId: "1:21554059222:web:f5a6c2b1561e7c6456b677"
 };
 
 function App() {
@@ -71,7 +70,7 @@ function App() {
     useEffect(() => {
         const fetchToken = async () => {
             try {
-                const response = await fetch('http://localhost:3001/api/get-token');
+                const response = await fetch('https://one14-1-spotify-project.onrender.com');
                 if (!response.ok) throw new Error("API Error");
                 const data = await response.json();
                 if (data.access_token) setAccessToken(data.access_token);
