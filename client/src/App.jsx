@@ -20,16 +20,14 @@ const API_BASE_URL = window.location.hostname === 'localhost' || window.location
     ? 'http://localhost:3001'
     : 'https://spotify-3d-project.onrender.com';
 
-// ============================================================================
-// [🔥 關鍵修正 🔥] 請刪除下面的範例資料，填入您自己的 Firebase 設定
-// ============================================================================
+// [Firebase 設定]
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.firebasestorage.app",
-    messagingSenderId: "...",
-    appId: "..."
+    apiKey: "AIzaSyBZmXt6xfFFZ29eDGG-7tHzT7MtJsc7eQE",
+    authDomain: "spoti-24a7e.firebaseapp.com",
+    projectId: "spoti-24a7e",
+    storageBucket: "spoti-24a7e.firebasestorage.app",
+    messagingSenderId: "21554059222",
+    appId: "1:21554059222:web:f5a6c2b1561e7c6456b677"
 };
 
 function App() {
