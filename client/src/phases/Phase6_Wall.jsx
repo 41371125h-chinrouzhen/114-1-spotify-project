@@ -4,8 +4,10 @@ import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { collection, query, limit, orderBy, onSnapshot } from "firebase/firestore";
 
+// --- 3D 元件：彈幕文字視窗 ---
 const DanmakuMessage = ({ data }) => {
     const group = useRef();
+
     const config = useMemo(() => {
         return {
             x: (Math.random() - 0.5) * 30,
@@ -30,15 +32,22 @@ const DanmakuMessage = ({ data }) => {
 
     return (
         <group ref={group} position={[config.x, config.y, config.z]}>
+            {/* 1. 文字視窗背景 */}
             <mesh position={[0, 0, -0.02]}>
                 <planeGeometry args={[bgWidth, 1.2]} />
                 <meshBasicMaterial color="black" transparent opacity={0.6} />
             </mesh>
-            <mesh position={[0, 0, -0.01]}>
-                <boxGeometry args={[bgWidth, 1.2, 0.01]} />
-                <meshBasicMaterial color="#1ED760" wireframe={true} />
-            </mesh>
-            <Text fontSize={0.4} color="white" anchorX="center" anchorY="middle">
+
+            {/* 移除綠色邊框 (Wireframe mesh) */}
+            {/* 移除原本這裡的 mesh */}
+
+            {/* 3. 留言文字 (字體大小統一) */}
+            <Text
+                fontSize={0.5}  /* 固定字體大小 */
+                color="white"
+                anchorX="center"
+                anchorY="middle"
+            >
                 {textContent}
             </Text>
         </group>
