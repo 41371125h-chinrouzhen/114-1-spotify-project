@@ -128,8 +128,8 @@ body {
 
 #text-within {
     top: 55%;
-    left: 60%;
-    font-size: 9rem;
+    left: 55%;
+    font-size: 8rem;
     z-index: 6;
     transform: translateZ(60px);
 }

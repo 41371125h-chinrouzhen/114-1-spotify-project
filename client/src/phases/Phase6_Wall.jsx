@@ -27,7 +27,10 @@ const DanmakuMessage = ({ data }) => {
         }
     });
 
-    const textContent = `(${data.displayName})：${data.text}`;
+    // [修正] 只保留文字內容，不顯示使用者名稱
+    const textContent = data.text;
+
+    // 重新計算背景寬度
     const bgWidth = textContent.length * 0.35 + 1;
 
     return (
@@ -38,15 +41,20 @@ const DanmakuMessage = ({ data }) => {
                 <meshBasicMaterial color="black" transparent opacity={0.6} />
             </mesh>
 
-            {/* 移除綠色邊框 (Wireframe mesh) */}
-            {/* 移除原本這裡的 mesh */}
+            {/* 2. 視窗邊框 (移除線框，只留背景讓文字更清楚，或者保留線框視您喜好) */}
+            {/* 這裡保留線框以維持風格，若要移除可將 wireframe={true} 改為 false 或移除 mesh */}
+            <mesh position={[0, 0, -0.01]}>
+                <boxGeometry args={[bgWidth, 1.2, 0.01]} />
+                <meshBasicMaterial color="#1ED760" wireframe={true} />
+            </mesh>
 
-            {/* 3. 留言文字 (字體大小統一) */}
+            {/* 3. 留言文字 */}
             <Text
-                fontSize={0.5}  /* 固定字體大小 */
+                fontSize={0.5}
                 color="white"
                 anchorX="center"
                 anchorY="middle"
+            // 移除 font 屬性以避免載入錯誤，使用預設字型
             >
                 {textContent}
             </Text>
