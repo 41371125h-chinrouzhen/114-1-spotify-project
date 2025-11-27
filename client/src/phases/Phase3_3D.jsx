@@ -10,7 +10,6 @@ const THEME_COLORS = [
     new THREE.Color("#00FFFF"),
 ];
 
-// [需求 2] 縮小所有球體 0.8 倍
 const slots = [
     { position: new THREE.Vector3(0, 0, 1.5), scale: 0.8, opacity: 1.0 },
     { position: new THREE.Vector3(2.0, 0, 0), scale: 0.48, opacity: 0.6 },

@@ -10,23 +10,26 @@ import Phase1_UI from './phases/Phase1_UI.jsx';
 import Phase2_UI from './phases/Phase2_UI.jsx';
 import Phase3_UI from './phases/Phase3_UI.jsx';
 import Phase6_Wall, { Phase6_UI } from './phases/Phase6_Wall.jsx';
+import Phase7_AIResult from './phases/Phase7_AIResult.jsx'; // [新增]
 import ModalOverlay from './components/ModalOverlay.jsx';
 import PlaylistUI from './components/PlaylistUI.jsx';
 import BackButton from './components/BackButton.jsx';
 
 // [自動判斷後端網址]
-// 開發時用 localhost，部署後用 Render 網址
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3001'
-    : 'https://one14-1-spotify-project.onrender.com'; // 部署前請確認此網址
+    : 'https://spotify-3d-project.onrender.com';
 
+// ============================================================================
+// [🔥 關鍵修正 🔥] 請刪除下面的範例資料，填入您自己的 Firebase 設定
+// ============================================================================
 const firebaseConfig = {
-    apiKey: "AIzaSyBZmXt6xfFFZ29eDGG-7tHzT7MtJsc7eQE",
-    authDomain: "spoti-24a7e.firebaseapp.com",
-    projectId: "spoti-24a7e",
-    storageBucket: "spoti-24a7e.firebasestorage.app",
-    messagingSenderId: "21554059222",
-    appId: "1:21554059222:web:f5a6c2b1561e7c6456b677"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.firebasestorage.app",
+    messagingSenderId: "...",
+    appId: "..."
 };
 
 function App() {
@@ -38,17 +41,10 @@ function App() {
     // --- 1. Firebase Initialization ---
     useEffect(() => {
         let config = null;
-
-        // 1. 嘗試讀取雲端環境變數 (Deployment)
         if (typeof __firebase_config !== 'undefined') {
-            try {
-                config = JSON.parse(__firebase_config);
-            } catch (e) { console.error("Config Parse Error:", e); }
-        }
-        // 2. 嘗試讀取本地設定 (Localhost)
-        // 這裡加上 typeof 檢查以防萬一，但主要靠上方的 const 宣告
-        else if (typeof LOCAL_FIREBASE_CONFIG !== 'undefined' && LOCAL_FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY") {
-            config = LOCAL_FIREBASE_CONFIG;
+            try { config = JSON.parse(__firebase_config); } catch (e) { console.error(e); }
+        } else if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+            config = firebaseConfig;
         }
 
         if (config) {
@@ -61,11 +57,9 @@ function App() {
                 signInAnonymously(authInstance).catch((e) => console.error("Auth Error:", e));
                 onAuthStateChanged(authInstance, (u) => setUser(u));
                 console.log("✅ Firebase Connected!");
-            } catch (e) {
-                console.error("🔥 Firebase Init Failed:", e);
-            }
+            } catch (e) { console.error("🔥 Firebase Init Failed:", e); }
         } else {
-            console.warn("⚠️ 未偵測到有效的 Firebase 設定。請檢查 App.jsx 上方的 LOCAL_FIREBASE_CONFIG 是否已填寫。");
+            console.warn("⚠️ 未偵測到有效的 Firebase 設定。");
         }
     }, []);
 
@@ -84,11 +78,12 @@ function App() {
     const [selectedSongIndex, setSelectedSongIndex] = useState(0);
     const [totalSongs, setTotalSongs] = useState(0);
     const [msgInput, setMsgInput] = useState("");
+    const [aiResultData, setAiResultData] = useState(null);
+    const [uploadFileName, setUploadFileName] = useState("");
 
     useEffect(() => {
         const fetchToken = async () => {
             try {
-                // 使用動態網址
                 const response = await fetch(`${API_BASE_URL}/api/get-token`);
                 if (!response.ok) throw new Error("API Error");
                 const data = await response.json();
@@ -122,7 +117,6 @@ function App() {
         if (currentStage === 3) {
             if (isWheeling) return;
             setIsWheeling(true);
-            // 5 顆球輪替
             if (e.deltaY > 0) setSelectedSphereIndex((prev) => (prev + 1) % 5);
             else setSelectedSphereIndex((prev) => (prev - 1 + 5) % 5);
             setTimeout(() => setIsWheeling(false), 500);
@@ -131,24 +125,36 @@ function App() {
 
     const handleModalOpen = (index) => {
         if (currentStage !== 3) return;
-        if (index === 3) setCurrentStage(6); // Index 3 是留言牆
+        if (index === 3) setCurrentStage(6);
         else {
             setCurrentStage(4);
             setModal({ isVisible: true, type: index });
         }
     };
 
+    const handleModalClose = () => {
+        setModal({ isVisible: false, type: null });
+        setCurrentStage(3);
+    };
+
     const handleModalSubmit = (payload) => {
-        setStage5Payload(payload);
-        setModal({ isVisible: false, type: modal.type });
-        setTotalSongs(0);
-        setSelectedSongIndex(0);
-        setCurrentPreviewUrl(null);
-        setTimeout(() => setCurrentStage(5), 1000);
+        if (payload.type === 'AI_RESULT') {
+            setAiResultData(payload.data);
+            setUploadFileName(payload.fileName);
+            setModal({ isVisible: false, type: modal.type });
+            setCurrentStage(7);
+        } else {
+            setStage5Payload(payload);
+            setModal({ isVisible: false, type: modal.type });
+            setTotalSongs(0);
+            setSelectedSongIndex(0);
+            setCurrentPreviewUrl(null);
+            setTimeout(() => setCurrentStage(5), 1000);
+        }
     };
 
     const handleGoBack = () => {
-        if (currentStage === 6) { setCurrentStage(3); return; }
+        if (currentStage === 6 || currentStage === 7) { setCurrentStage(3); return; }
         setCurrentStage(3);
         setSelectedSphereIndex(0);
         setStage5Payload(null);
@@ -159,7 +165,7 @@ function App() {
     };
 
     const handleLike = async (song) => {
-        if (!db) { alert("資料庫未連線，無法按讚"); return; }
+        if (!db) { alert("Database not connected."); return; }
         if (isGuest) return;
         try {
             const likesRef = collection(db, 'artifacts', appId, 'public', 'data', 'likes');
@@ -206,16 +212,11 @@ function App() {
                 />
             </div>
 
-            <div className={`scroll-container ${currentStage === 5 || currentStage === 6 ? 'at-stage-5' : ''}`} ref={scrollContainerRef}>
-                <Phase1_UI
-                    currentStage={currentStage}
-                    onNextStage={handleNextStage}
-                    isLoading={isLoading}
-                    onLogin={handleLogin}
-                />
+            <div className={`scroll-container ${currentStage === 5 || currentStage === 6 || currentStage === 7 ? 'at-stage-5' : ''}`} ref={scrollContainerRef}>
+                <Phase1_UI currentStage={currentStage} onNextStage={handleNextStage} isLoading={isLoading} onLogin={handleLogin} />
                 <Phase2_UI currentStage={currentStage} />
                 <Phase3_UI currentStage={currentStage} selectedSphereIndex={selectedSphereIndex} />
-                <ModalOverlay isVisible={modal.isVisible} type={modal.type} onSubmit={handleModalSubmit} />
+                <ModalOverlay isVisible={modal.isVisible} type={modal.type} onSubmit={handleModalSubmit} onClose={handleModalClose} />
                 <PlaylistUI
                     currentStage={currentStage}
                     stage5Payload={stage5Payload}
@@ -229,14 +230,10 @@ function App() {
                     isGuest={isGuest}
                 />
                 {currentStage === 5 && <BackButton currentStage={currentStage} onClick={handleGoBack} />}
-                <Phase6_UI
-                    currentStage={currentStage}
-                    inputValue={msgInput}
-                    setInputValue={setMsgInput}
-                    onSend={handleSendMsg}
-                    isGuest={isGuest}
-                    onBack={handleGoBack}
-                />
+                {/* Phase6_UI (2D) 在這裡渲染 */}
+                <Phase6_UI currentStage={currentStage} inputValue={msgInput} setInputValue={setMsgInput} onSend={handleSendMsg} isGuest={isGuest} onBack={handleGoBack} />
+                {/* Phase7_AIResult (2D) 在這裡渲染 */}
+                {currentStage === 7 && <Phase7_AIResult resultData={aiResultData} fileName={uploadFileName} onBack={handleGoBack} />}
             </div>
 
             <audio

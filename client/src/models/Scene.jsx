@@ -15,6 +15,7 @@ function Scene({ currentStage, selectedSphereIndex, onModalOpen, onWheel, songCo
             <directionalLight position={[5, 10, 5]} intensity={2.0} />
             {currentStage === 5 && <pointLight position={[-1, 1, 2]} intensity={5.0} distance={15} color="#1ED760" />}
             {currentStage === 6 && <pointLight position={[0, 0, 5]} intensity={3.0} color="#FFD700" />}
+            {currentStage === 7 && <pointLight position={[0, 2, 5]} intensity={4.0} color="#00FFFF" />}
 
             <ErrorBoundary>
                 <Suspense fallback={null}>

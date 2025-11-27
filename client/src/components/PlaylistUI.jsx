@@ -11,6 +11,7 @@ const buildSearchQuery = (payload) => {
             return `${payload.mood} vibes`;
         case 'Weather':
             return `${payload.weather} chill songs`;
+        case 'AI_SEARCH': return payload.query;
         default: return "Pop";
     }
 };
