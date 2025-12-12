@@ -1,5 +1,7 @@
 # 🎵 Spotify 3D 沉浸式音樂探索平台
-陳柔蓁 41371125H
+* 姓名：陳柔蓁 
+* 學號：41371125H
+
 ## Live Demo
 [點擊這裡體驗網站](https://one14-1-spotify-project-frontend.onrender.com)
 
