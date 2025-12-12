@@ -136,14 +136,19 @@ function App() {
     };
 
     const handleModalSubmit = (payload) => {
+        
+        setModal({ isVisible: false, type: modal.type });
+
+        setTimeout(() => {
+            setModal({ isVisible: false, type: null });
+        }, 500);
+
         if (payload.type === 'AI_RESULT') {
             setAiResultData(payload.data);
             setUploadFileName(payload.fileName);
-            setModal({ isVisible: false, type: modal.type });
             setCurrentStage(7);
         } else {
             setStage5Payload(payload);
-            setModal({ isVisible: false, type: modal.type });
             setTotalSongs(0);
             setSelectedSongIndex(0);
             setCurrentPreviewUrl(null);
