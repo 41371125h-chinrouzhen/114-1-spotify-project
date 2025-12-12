@@ -11,18 +11,11 @@ const PORT = process.env.PORT || 3001;
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// --- 1. CORS 設定修正 ---
-app.use(cors({
-    origin: 'https://one14-1-spotify-project-frontend.onrender.com', 
-    methods: ['GET', 'POST'], 
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
+app.use(cors());
 app.use(express.json());
 
-// --- 2. Spotify URL 修正 ---
-const TOKEN_URL = 'https://accounts.spotify.com/api/token'; 
-
+// --- Spotify Config ---
+const TOKEN_URL = 'https://accounts.spotify.com/api/token';
 let spotifyToken = { value: null, expiresAt: null };
 const getSpotifyToken = async () => {
     if (spotifyToken.value && spotifyToken.expiresAt > Date.now()) return spotifyToken.value;
@@ -37,10 +30,7 @@ const getSpotifyToken = async () => {
         spotifyToken.value = response.data.access_token;
         spotifyToken.expiresAt = Date.now() + (response.data.expires_in * 1000) - 60000;
         return spotifyToken.value;
-    } catch (error) { 
-        console.error("Spotify Token Error:", error.message); // 建議加一個 log 方便除錯
-        return null; 
-    }
+    } catch (error) { return null; }
 };
 
 app.get('/api/get-token', async (req, res) => {
