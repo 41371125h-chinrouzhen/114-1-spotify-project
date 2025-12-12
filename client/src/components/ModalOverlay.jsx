@@ -29,14 +29,29 @@ const ModalWeather = ({ onSubmit, onClose }) => {
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
             try {
-                const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`;
-                const res = await fetch(url);
-                if (!res.ok) throw new Error("API Error");
-                const data = await res.json();
-                setResult({ city: data.name, weather: data.weather[0].main });
-                setCityInput(data.name);
-            } catch (err) { setError("Failed to fetch data."); }
-            finally { setIsLoading(false); }
+                // 1. 獲取天氣資訊 (包含溫度)
+                const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`;
+                const weatherRes = await fetch(weatherUrl);
+                if (!weatherRes.ok) throw new Error("Weather API Error");
+                const weatherData = await weatherRes.json();
+
+                // 2. 獲取 IP 資訊
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+
+                setResult({
+                    city: weatherData.name,
+                    weather: weatherData.weather[0].main,
+                    temp: Math.round(weatherData.main.temp), // 溫度
+                    ip: ipData.ip // IP
+                });
+                setCityInput(weatherData.name);
+            } catch (err) {
+                console.error(err);
+                setError("Failed to fetch data.");
+            } finally {
+                setIsLoading(false);
+            }
         }, () => { setError("Access denied."); setIsLoading(false); });
     };
 
@@ -71,8 +86,7 @@ const ModalWeather = ({ onSubmit, onClose }) => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '10px' }}>
                         <div style={{ textAlign: 'center' }}>
                             <div style={{ color: '#888', fontSize: '0.8rem' }}>TEMP</div>
-                            {/* 注意：這裡若 API 沒有回傳 main.temp 可能會報錯，建議加上選填鏈接或預設值 */}
-                            <div style={{ fontSize: '1.5rem', color: 'white' }}>{result.temp ? result.temp + "°C" : "--"}</div>
+                            <div style={{ fontSize: '1.5rem', color: 'white' }}>{result.temp}°C</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
                             <div style={{ color: '#888', fontSize: '0.8rem' }}>WEATHER</div>
@@ -82,7 +96,7 @@ const ModalWeather = ({ onSubmit, onClose }) => {
 
                     <div style={{ marginBottom: '20px', width: '100%', textAlign: 'center' }}>
                         <div style={{ color: '#888', fontSize: '0.8rem' }}>IP ADDRESS</div>
-                        <div style={{ fontSize: '1rem', color: '#aaa', fontFamily: 'monospace' }}>{result.ip || "Unknown"}</div>
+                        <div style={{ fontSize: '1rem', color: '#aaa', fontFamily: 'monospace' }}>{result.ip}</div>
                     </div>
 
                     <button className="confirm-button" onClick={handleConfirm}>CONFIRM</button>
@@ -122,7 +136,7 @@ const ModalAI = ({ onSubmit, onClose }) => {
             recorder.onstop = async () => {
                 setStatus("processing");
                 const blob = new Blob(chunks.current, { type: 'audio/webm' });
-                await sendToBackend(blob, 'Microphone Recording.webm');
+                await sendToBackend(blob, 'recording.webm');
                 stream.getTracks().forEach(track => track.stop());
             };
 
@@ -153,10 +167,7 @@ const ModalAI = ({ onSubmit, onClose }) => {
         formData.append('audio', fileBlob, fileName);
 
         try {
-            const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                ? 'http://localhost:3001'
-                : 'https://one14-1-spotify-project.onrender.com'; 
-
+            const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3001' : 'https://spotify-3d-project.onrender.com';
             const response = await fetch(`${API_URL}/api/identify-music`, { method: 'POST', body: formData });
             const data = await response.json();
 
@@ -185,7 +196,19 @@ const ModalAI = ({ onSubmit, onClose }) => {
                     <button onClick={() => fileInputRef.current.click()} style={{ background: '#444', border: '1px solid #666' }}>📁 UPLOAD FILE</button>
                     <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="audio/*" onChange={handleFileSelect} />
 
-                    <button onClick={onClose} className="back-button" style={{ position: 'static', marginTop: '20px', transform: 'none', width: 'auto', padding: '10px 30px', border: '1px solid rgba(255, 255, 255, 0.3)', color: 'white' }}>
+                    <button
+                        onClick={onClose}
+                        className="back-button"
+                        style={{
+                            position: 'static',
+                            marginTop: '20px',
+                            transform: 'none',
+                            width: 'auto',
+                            padding: '10px 30px',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            color: 'white'
+                        }}
+                    >
                         BACK TO MENU
                     </button>
                 </>
