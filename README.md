@@ -12,7 +12,7 @@
 
 # 🚀 專案介紹
 ## 核心功能 (Key Features)
-* **3D 沉浸式場景**：使用 `react-three/fiber` 建構互動式球體選單與粒子特效。
+* **3D 沉浸式場景**：使用 **react-three/fiber** 建構互動式球體選單與粒子特效。
 * **AI 哼歌辨識**：串接 **Audd.io API**，支援錄音/上傳檔案辨識歌曲。
 * **情境推薦 (Weather Vibe)**：結合 **OpenWeatherMap**，根據當地天氣推薦適合的音樂氛圍。
 * **即時留言牆**：透過 **Firebase Firestore** 實作 3D 彈幕互動。
