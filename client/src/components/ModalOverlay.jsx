@@ -167,7 +167,9 @@ const ModalAI = ({ onSubmit, onClose }) => {
         formData.append('audio', fileBlob, fileName);
 
         try {
-            const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3001' : 'https://spotify-3d-project.onrender.com';
+            const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3001'
+                : 'https://one14-1-spotify-project.onrender.com';
             const response = await fetch(`${API_URL}/api/identify-music`, { method: 'POST', body: formData });
             const data = await response.json();
 
