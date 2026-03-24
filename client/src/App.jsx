@@ -22,7 +22,7 @@ const API_BASE_URL = window.location.hostname === 'localhost' || window.location
 
 // [Firebase 設定]
 const firebaseConfig = {
-    apiKey: "AIzaSyBZmXt6xfFFZ29eDGG-7tHzT7MtJsc7eQE",
+    apiKey: "APIKEY",
     authDomain: "spoti-24a7e.firebaseapp.com",
     projectId: "spoti-24a7e",
     storageBucket: "spoti-24a7e.firebasestorage.app",
